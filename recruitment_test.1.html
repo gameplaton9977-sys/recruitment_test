@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RECRUITMENT — Knowledge Test</title>
+<style>
+:root{color-scheme:dark;--bg:#090909;--panel:#171717;--line:#444;--muted:#aaa;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font:16px/1.5 Arial,sans-serif;padding:24px}
+main{max-width:780px;margin:auto}.hero,.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:20px;margin-bottom:16px}
+.hero{text-align:center;background:#101010}.hero h1{letter-spacing:5px;margin:0;font-size:30px}.hero p{color:var(--muted);letter-spacing:2px;font-size:12px}
+h2{font-size:18px;margin:0 0 14px}label.field{display:block;margin:14px 0 6px;font-weight:bold}
+input[type=text],textarea{width:100%;padding:12px;background:#080808;border:1px solid #555;border-radius:8px;color:white;font:inherit}
+textarea{min-height:80px;resize:vertical}.question{background:#202020;border:1px solid #444;border-radius:12px;padding:16px;margin:14px 0}
+.qtitle{font-weight:bold;margin:0 0 12px}.num{font-size:11px;color:#aaa;letter-spacing:1px;margin-bottom:6px}
+.option{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:7px;cursor:pointer}.option:hover{background:#303030}.option input{margin-top:5px;accent-color:white}
+button{width:100%;padding:14px;border:1px solid white;border-radius:8px;background:white;color:#080808;font-weight:bold;font-size:15px;cursor:pointer;margin-top:12px}
+button.secondary{background:transparent;color:white}.muted{color:var(--muted);font-size:13px}.result{text-align:center;background:#292929;border:1px solid #666;border-radius:12px;padding:20px;margin-top:18px}.score{font-size:42px;font-weight:bold}
+.feedback{font-size:13px;margin-top:8px}.correct{color:#fff}.wrong{color:#ccc}
+.hidden{display:none}
+@media(max-width:520px){body{padding:12px}.hero h1{font-size:24px}}
+</style>
+</head>
+<body><main>
+<header class="hero"><h1>RECRUITMENT</h1><p>KNOWLEDGE TEST · BLACK & WHITE</p><strong>ПРОХІДНИЙ БАЛ: 8/10</strong></header>
+<form id="quiz">
+<section class="card">
+<h2>01 — Особиста інформація</h2>
+<label class="field" for="nick">1. Ваш нікнейм</label><input id="nick" type="text" required placeholder="Введіть ваш нікнейм">
+<label class="field" for="reason">2. Чому пішли в Recruitment?</label><textarea id="reason" required placeholder="Ваша відповідь..."></textarea>
+<label class="field" for="hours">3. Час у грі</label><input id="hours" type="text" required placeholder="Наприклад: 150 годин">
+</section>
+<section class="card"><h2>02 — Тестові запитання</h2><p class="muted">Оберіть лише один правильний варіант відповіді.</p><div id="questions"></div>
+<button type="submit">ЗАВЕРШИТИ ТЕСТ</button><p class="muted" id="progress">Відповіді надано: 0/10</p>
+</section>
+</form>
+<section id="result" class="result hidden" aria-live="polite"></section>
+<script>
+const qs=[
+["Скільки коштує 1 догана?",["100к","200к","50к"],0],
+["Скільки коштує підняття по блату?",["100к","150к","50к"],2],
+["Скільки контрактів треба виконати, щоб підвищитись 4–5?",["5 контрактів","3 контракти","7 контрактів"],0],
+["Чи потрібно відкидати, коли когось прийняв у загальний аудит?",["Ні","Так","Як захочу"],1],
+["Чи потрібно перевіряти нових співробітників на РП-терміни?",["Ні","Так","Дивлячись яка людина"],1],
+["Якщо написали стак на арені, але ти приймаєш людину, чи повинен ти сповістити старших?",["Ні","Як захочу","Так"],2],
+["Чи повинен рекрут відкидати в роботу за тиждень прийом нових співробітників?",["Так","Ні"],0],
+["Чи отримає рекрут премію, якщо він не зробив скрін, коли приймав людину, або не відкинув звіт і аудит?",["Так","Ні","За рішенням старших"],1],
+["О котрій годині починається перше тренування на арені?",["21:00","22:00"],0],
+["О котрій годині починається друге тренування на арені?",["23:15","00:00","23:00"],0]
+];
+const root=document.getElementById('questions');
+qs.forEach((q,i)=>{
+ const box=document.createElement('div');box.className='question';
+ const n=document.createElement('div');n.className='num';n.textContent=`ПИТАННЯ ${i+1}/10`;box.append(n);
+ const title=document.createElement('p');title.className='qtitle';title.textContent=q[0];box.append(title);
+ q[1].forEach((v,j)=>{const lab=document.createElement('label');lab.className='option';const r=document.createElement('input');r.type='radio';r.name='q'+i;r.value=j;r.required=j===0;const span=document.createElement('span');span.textContent=`${j+1}) ${v}`;lab.append(r,span);box.append(lab)});
+ root.append(box);
+});
+function update(){let count=qs.filter((q,i)=>document.querySelector(`input[name=q${i}]:checked`)).length;document.getElementById('progress').textContent=`Відповіді надано: ${count}/10`}
+root.addEventListener('change',update);
+document.getElementById('quiz').addEventListener('submit',e=>{
+ e.preventDefault();let score=0;const result=document.getElementById('result');result.classList.remove('hidden');
+ qs.forEach((q,i)=>{const chosen=document.querySelector(`input[name=q${i}]:checked`);const ok=Number(chosen.value)===q[2];if(ok)score++;const box=root.children[i];const fb=document.createElement('p');fb.className='feedback '+(ok?'correct':'wrong');fb.textContent=ok?'✓ Правильно':`✗ Неправильно. Правильна відповідь: ${q[2]+1}) ${q[1][q[2]]}`;box.append(fb)});
+ const passed=score>=8;
+ result.innerHTML='';
+ const heading=document.createElement('h2');heading.textContent='РЕЗУЛЬТАТ ТЕСТУ';result.append(heading);
+ const sc=document.createElement('div');sc.className='score';sc.textContent=`${score}/10`;result.append(sc);
+ const status=document.createElement('strong');status.textContent=passed?'ТЕСТ СКЛАДЕНО':'ТЕСТ НЕ СКЛАДЕНО';result.append(status);
+ const details=document.createElement('p');details.textContent=`Нікнейм: ${document.getElementById('nick').value} · Час у грі: ${document.getElementById('hours').value} · Прохідний бал: 8/10`;result.append(details);
+ const reason=document.createElement('p');reason.className='muted';reason.textContent='Мотивація: '+document.getElementById('reason').value;result.append(reason);
+ const retry=document.createElement('button');retry.className='secondary';retry.textContent='ПРОЙТИ ТЕСТ ПОВТОРНО';retry.onclick=()=>location.reload();result.append(retry);
+ document.querySelectorAll('#quiz input,#quiz textarea,#quiz button[type=submit]').forEach(el=>el.disabled=true);
+ result.scrollIntoView({behavior:'smooth'});
+});
+</script></main></body></html>
